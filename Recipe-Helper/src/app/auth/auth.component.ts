@@ -5,6 +5,9 @@ import { Observable, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { AlertComponent } from '../shared/alert/alert.component';
 import { PlaceholderDirective } from '../shared/placeholder/placeholder.directive';
+import { Store } from '@ngrx/store';
+import * as fromApp from '../store/app.reducer';
+import * as AuthActions from './store/auth.actions';
 
 @Component({
     selector: 'app-auth',
@@ -20,8 +23,19 @@ export class AuthComponent {
     constructor(
         private authService: AuthService, 
         private router: Router, 
-        private componentFactoryResolver: ComponentFactoryResolver
+        private componentFactoryResolver: ComponentFactoryResolver,
+        private store: Store<fromApp.AppState>
     ) { }
+
+    ngOnInit() {
+        this.store.select('auth').subscribe(authState => {
+            this.isLoading = authState.loading;
+            this.error = authState.authError;
+            if(this.error) {
+                this.showErrorAlert(this.error);
+            }
+        })
+    }
 
     onSwitchMode() {
         this.isLoginMode = !this.isLoginMode;
@@ -39,23 +53,26 @@ export class AuthComponent {
 
         this.isLoading = true;
         if (this.isLoginMode) {
-            authObs = this.authService.login(email, password);
+            //authObs = this.authService.login(email, password);
+            this.store.dispatch(
+                new AuthActions.LogingStart({email: email, password: password})
+            );
         } else {
             authObs = this.authService.signup(email, password);
         }
 
-        authObs.subscribe(
-            resData => {
-                console.log(resData);
-                this.isLoading = false;
-                this.router.navigate(['/recipes']);
-            },
-            errorRes => {
-                console.log(errorRes);
-                this.error = errorRes;
-                this.showErrorAlert(errorRes);
-                this.isLoading = false;
-            });
+        // authObs.subscribe(
+        //     resData => {
+        //         console.log(resData);
+        //         this.isLoading = false;
+        //         this.router.navigate(['/recipes']);
+        //     },
+        //     errorRes => {
+        //         console.log(errorRes);
+        //         this.error = errorRes;
+        //         this.showErrorAlert(errorRes);
+        //         this.isLoading = false;
+        //     });
 
         form.reset()
     }
