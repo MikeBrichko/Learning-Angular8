@@ -12,13 +12,13 @@ export class DataStorageService {
     private http: HttpClient,
     private recipeService: RecipeService,
     private authService: AuthService
-  ) { }
+  ) {}
 
   storeRecipes() {
     const recipes = this.recipeService.getRecipes();
     this.http
       .put(
-        'https://recipe-helper-ca4da.firebaseio.com/recipes.json',
+        'https://ng-course-recipe-book-65f10.firebaseio.com/recipes.json',
         recipes
       )
       .subscribe(response => {
@@ -29,20 +29,20 @@ export class DataStorageService {
   fetchRecipes() {
     return this.http
       .get<Recipe[]>(
-          'https://recipe-helper-ca4da.firebaseio.com/recipes.json',
-        )
-        .pipe(
-          map(recipes => {
-            return recipes.map(recipe => {
-              return {
-                ...recipe,
-                ingredients: recipe.ingredients ? recipe.ingredients : []
-              };
-            });
-          }),
-          tap(recipes => {
-            this.recipeService.setRecipes(recipes);
-          })
-        );
+        'https://ng-course-recipe-book-65f10.firebaseio.com/recipes.json'
+      )
+      .pipe(
+        map(recipes => {
+          return recipes.map(recipe => {
+            return {
+              ...recipe,
+              ingredients: recipe.ingredients ? recipe.ingredients : []
+            };
+          });
+        }),
+        tap(recipes => {
+          this.recipeService.setRecipes(recipes);
+        })
+      );
   }
 }
